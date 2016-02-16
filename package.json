@@ -1,0 +1,27 @@
+{
+  "name": "jake",
+  "version": "1.0.0",
+  "description": "Docker-compose helper",
+  "main": "jake.js",
+  "bin": "./jake.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@glavweb.ru:env/jake.git"
+  },
+  "keywords": [
+    "docker",
+    "docker-composer",
+    "ci",
+    "cd"
+  ],
+  "author": "Sergey Zvyagintsev <nitron.ru@gmail.com>",
+  "license": "ISC",
+  "dependencies": {
+    "argparse": "^1.0.6",
+    "js-yaml": "^3.5.3",
+    "mkdirp": "^0.5.1"
+  }
+}
