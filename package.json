@@ -1,5 +1,5 @@
 {
-  "name": "jake",
+  "name": "@nitro-n/jake",
   "version": "1.0.0",
   "description": "Docker-compose helper",
   "main": "jake.js",
@@ -7,10 +7,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "repository": {
-    "type": "git",
-    "url": "git@glavweb.ru:env/jake.git"
-  },
+  "repository": "github:glavweb/jake",
   "keywords": [
     "docker",
     "docker-composer",
@@ -22,6 +19,7 @@
   "dependencies": {
     "argparse": "^1.0.6",
     "js-yaml": "^3.5.3",
+    "log-util": "^1.1.1",
     "mkdirp": "^0.5.1"
   }
 }

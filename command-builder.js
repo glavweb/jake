@@ -11,6 +11,7 @@ function CommandBuilder() {
     this.container = null;
     this.isDockerCommand = false;
     this.cmd = [];
+    this.isRunning = false;
 }
 
 CommandBuilder.prototype.setProjectName = function (inProjectName) {
@@ -43,9 +44,29 @@ CommandBuilder.prototype.setContainer = function (inContainer) {
     return this;
 };
 
+CommandBuilder.prototype.setContainerId = function (inContainerId) {
+    this.containerId = inContainerId;
+    return this;
+};
+
+CommandBuilder.prototype.setTty = function (inTty) {
+    this.tty = inTty;
+    return this;
+};
+
+CommandBuilder.prototype.setInteractive = function (inInteractive) {
+    this.interactive = inInteractive;
+    return this;
+};
+
 CommandBuilder.prototype.setCmd = function (isDocker, inCmd) {
     this.isDockerCommand = isDocker;
     this.cmd = inCmd;
+    return this;
+};
+
+CommandBuilder.prototype.setIsRunning = function (inIsRunning) {
+    this.isRunning = inIsRunning;
     return this;
 };
 
@@ -61,29 +82,61 @@ CommandBuilder.prototype.getAlias = function (inCmd) {
     return null;
 };
 
+CommandBuilder.prototype._build = function () {
+    var result;
+
+    result = 'docker-compose';
+
+    result += ' -p ' + this.projectName;
+
+    var i;
+
+    for (i = 0; i < this.composeFiles.length; i++) {
+        var composeFileName = this.composeFiles[i];
+        result += ' -f ' + composeFileName + '';
+    }
+
+    return result;
+};
+
 CommandBuilder.prototype.build = function () {
     var result;
 
     if (this.isDockerCommand || this.container !== null) {
-        result = 'docker-compose';
-
-        result += ' -p ' + this.projectName;
-
-        var i;
-
-        for (i = 0; i < this.composeFiles.length; i++) {
-            var composeFileName = this.composeFiles[i];
-            result += ' -f ' + composeFileName + '';
-        }
+        result = this._build();
 
         if (this.isDockerCommand) {
             result += ' ' + this.cmd.join(' ');
         } else if (this.container !== null) {
-            result += ' run --rm';
+            if (this.isRunning) {
+                result = 'docker exec';
+                if (this.tty) {
+                    result += ' -t';
+                }
+                if (this.interactive) {
+                    result += ' -i';
+                }
+            } else {
+                result += ' run --rm';
+            }
             if (this.user !== null) {
                 result += ' -u ' + this.user;
             }
-            result += ' ' + this.container + ' ' + this.cmd.join(' ');
+            result += ' ';
+
+            if (this.isRunning) {
+                result += this.containerId;
+            } else {
+                result += this.container;
+            }
+
+            result += ' bash -c';
+            
+            if (this.interactive) {
+                result += 'i';
+            }
+            
+            result += ' "' + this.cmd.join(' ') + '"';
         }
     } else {
         var alias = this.cmd[0];
@@ -98,4 +151,17 @@ CommandBuilder.prototype.build = function () {
     return result;
 };
 
+CommandBuilder.prototype.buildPs = function () {
+    var result;
+
+    result = this._build();
+
+    result += ' ps -q ' + this.container;
+
+    return result;
+};
+
+CommandBuilder.prototype.buildIsRunning = function () {
+    return 'docker inspect -f "{{.State.Running}}" ' + this.containerId;
+};
 

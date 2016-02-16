@@ -1,38 +1,35 @@
 'use strict';
 
-var spawnSync = require('child_process').spawnSync;
+var stream = require('stream');
+var cp = require('child_process');
+var process = require('process');
 
-module.exports.Executor = Executor;
+module.exports = Executor;
 
-function Executor(param) {
-
+function Executor(inLogger) {
+    this.logger = inLogger;
 }
 
-Executor.prototype.exec = function (inCmd) {
-    console.log('EXEC', inCmd);
-    var command, args;
+Executor.prototype.exec = function (inCmd, inNeedOutput) {
+    var logger = this.logger;
 
-    if (process.platform === 'win32') {
-        command = 'cmd';
-        args = ['/C', inCmd];
-    } else {
-        command = 'bash';
-        args = ['-c', '"' + inCmd + '"'];
-    }
+    logger.debug('EXEC', inCmd);
+    
+    try {
+        return cp.execSync(inCmd, {
+            cwd: process.cwd(),
+            env: process.env,
+            stdio: [0, inNeedOutput ? 'pipe' : 1, 2],
+            encoding: 'utf-8'
+        });
+    } catch (childProcess) {
+        if ('error' in childProcess) {
+            logger.error('ERROR', childProcess.error);
+        }
 
-    var cmd = spawnSync(command, args, {
-        cwd: process.cwd(),
-        env: process.env,
-        stdio: 'inherit',
-        encoding: 'utf-8'
-    });
-
-    if ('error' in cmd) {
-        console.log('ERROR', cmd.error);
-    }
-
-    if (cmd.status !== 0) {
-        console.log('EXIT', cmd.status);
-        process.exit(cmd.status);
+        if (childProcess.status !== 0) {
+            logger.error('EXIT', childProcess.status);
+            process.exit(childProcess.status);
+        } 
     }
 };

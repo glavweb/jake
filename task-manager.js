@@ -1,15 +1,13 @@
 'use strict';
 
-var Executor = require('./executor').Executor;
-var executor = new Executor();
-
 module.exports.TaskManager = TaskManager;
 module.exports.Task = Task;
 
-function TaskManager(inConfig) {
+function TaskManager(inConfig, inExecutor) {
     this.config = inConfig;
     this.tasks = {};
     this.init();
+    this.executor = inExecutor;
 }
 
 TaskManager.prototype.init = function () {
@@ -54,6 +52,6 @@ Task.prototype.run = function () {
 
     for (i = 0; i < this.script.length; i++) {
         var script = this.script[i];
-        executor.exec(script);
+        this.manager.executor.exec(script);
     }
 };

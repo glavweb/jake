@@ -1,0 +1,49 @@
+project_name: glavweb-is
+environtments:
+  dev:
+    vars:
+      - VIRTUAL_HOST: $JAKE_PROJECT_NAME.dev
+      - WORKSPACE: ../workspace/$JAKE_PROJECT_NAME
+    docker:
+      user: "1000:1000"
+      compose_files:
+        - ./ci/docker-compose.yml
+        - ./ci/docker-compose.dev.yml
+    files:
+      cp_env:
+        - ['./ci/project-files/dev/parameters.yml', './app/config/parameters.yml']
+  test:
+    vars:
+      - VIRTUAL_HOST: '*'
+      - WORKSPACE: $WS_DIR/$JAKE_PROJECT_NAME
+      - DB_USER_PASSWORD: '*'
+      - DB_ROOT_PASSWORD: '*'
+    docker:
+      user: "1000:1000"
+      compose_files:
+        - ./ci/docker-compose.yml
+        - ./ci/docker-compose.test.yml
+    files:
+      cp_env:
+        - ['./ci/project-files/test/parameters.yml', './app/config/parameters.yml']
+
+tasks:
+  recreate:
+    script:
+      - jake -d rm -f
+      - jake -d build
+      - jake -d up -d
+  install:
+    dependency:
+      - recreate
+    script:
+      - jake npm install
+      - jake bower install
+      - jake composer install --no-interaction
+      - jake console doctrine:schema:update --force
+
+aliases:
+  composer: jake -c php composer
+  npm: jake -c node npm
+  bower: jake -c node bower
+  console: jake -c php php app/console

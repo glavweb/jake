@@ -35,9 +35,30 @@ parser.addArgument(
     }
 );
 parser.addArgument(
+    [ '-u', '--user' ],
+    {
+        help: 'user to execute'
+    }
+);
+parser.addArgument(
     [ '-i', '--interactive' ],
     {
-        help: 'jake shell',
+        help: 'docker exec --interactive',
+        action: 'storeTrue'
+    }
+);
+parser.addArgument(
+    [ '--tty' ],
+    {
+        help: 'docker exec --tty',
+        action: 'storeTrue'
+    }
+);
+
+parser.addArgument(
+    [ '--debug' ],
+    {
+        help: 'show debug information',
         action: 'storeTrue'
     }
 );
