@@ -1,6 +1,6 @@
 {
   "name": "@nitro-n/jake",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Docker-compose helper",
   "main": "jake.js",
   "bin": "./jake.js",
