@@ -27,6 +27,8 @@ try {
     logger.debug('JAKE_ENV', env);
 
     var envConfig = config.environtments[env];
+    var envReplace = require('./env-replace');
+    
     if (args.task !== null) {
         var TaskManager = require('./task-manager').TaskManager;
 
@@ -35,8 +37,10 @@ try {
             var pathList = envConfig.files.cp_env;
             for (var j = 0; j < pathList.length; j++) {
                 var cpEnvArray = pathList[j];
-                logger.debug('COPY_ENV', cpEnvArray[0], cpEnvArray[1]);
-                copyEnv(cpEnvArray[0], cpEnvArray[1]);
+                var sourcePath = envReplace(cpEnvArray[0]);
+                var targetPath = envReplace(cpEnvArray[1]);
+                logger.debug('COPY_ENV', sourcePath, targetPath);
+                copyEnv(sourcePath, targetPath);
             }
         }
 
@@ -44,7 +48,6 @@ try {
     } else {
         var CommandBuilder = require('./command-builder').CommandBuilder;
         var commandBuilder = new CommandBuilder();
-        var envReplace = require('./env-replace');
 
         systemEnv.JAKE_PROJECT_NAME = config.project_name;
 
