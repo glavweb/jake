@@ -33,6 +33,10 @@ try {
     var envConfig = config.environtments[env];
     var envReplace = require('./env-replace');
 
+    if ('project_name' in config) {
+        systemEnv.JAKE_PROJECT_NAME = config.project_name;
+    }
+
     for (var i = 0; i < envConfig.vars.length; i++) {
         var varObject = envConfig.vars[i];
         for (var varName in varObject) {
@@ -55,6 +59,7 @@ try {
         }
     }
 
+    console.log(JSON.stringify(systemEnv, null, 2))
 
     if (args.task !== null) {
         var TaskManager = require('./task-manager').TaskManager;
@@ -75,8 +80,6 @@ try {
     } else {
         var CommandBuilder = require('./command-builder').CommandBuilder;
         var commandBuilder = new CommandBuilder();
-
-        systemEnv.JAKE_PROJECT_NAME = config.project_name;
 
         commandBuilder
             .setComposeFiles(envConfig.docker.compose_files)
