@@ -26,9 +26,36 @@ logger.debug('JAKE_DEBUG', systemEnv.JAKE_DEBUG, logLevel);
 try {
     logger.debug('JAKE_ENV', env);
 
+    if (!(env in config.environtments)) {
+        throw new Error('Env "', env, '" is not in config file');
+    }
+
     var envConfig = config.environtments[env];
     var envReplace = require('./env-replace');
-    
+
+    for (var i = 0; i < envConfig.vars.length; i++) {
+        var varObject = envConfig.vars[i];
+        for (var varName in varObject) {
+            if (varObject.hasOwnProperty(varName)) {
+                var value = varObject[varName];
+                if (value === '*') {
+                    if (!(varName in systemEnv)) {
+                        throw new Error('Variable "' + varName + '" expected, but not defined');
+                    }
+                } else {
+                    if (typeof value !== 'string') {
+                        throw new Error('Variable "' + varName + '" must be a string')
+                    }
+                    var replacedValue = envReplace(value + '');
+
+                    systemEnv[varName] = replacedValue;
+                    logger.debug('ENV', varName, '=', replacedValue, '(', value, ')');
+                }
+            }
+        }
+    }
+
+
     if (args.task !== null) {
         var TaskManager = require('./task-manager').TaskManager;
 
@@ -51,39 +78,10 @@ try {
 
         systemEnv.JAKE_PROJECT_NAME = config.project_name;
 
-        if (env in config.environtments) {
-
-            commandBuilder
-                .setComposeFiles(envConfig.docker.compose_files)
-                .setUser(args.user || envConfig.docker.user)
-                .setVars(envConfig.vars);
-
-            for (var i = 0; i < envConfig.vars.length; i++) {
-                var varObject = envConfig.vars[i];
-                for (var varName in varObject) {
-                    if (varObject.hasOwnProperty(varName)) {
-                        var value = varObject[varName];
-                        if (value === '*') {
-                            if (!(varName in systemEnv)) {
-                                throw new Error('Variable "' + varName + '" expected, but not defined');
-                            }
-                        } else {
-                            if (typeof value !== 'string') {
-                                throw new Error('Variable "' + varName + '" must be a string')
-                            }
-                            var replacedValue = envReplace(value + '');
-
-                            systemEnv[varName] = replacedValue;
-                            logger.debug('ENV', varName, '=', replacedValue, '(', value, ')');
-                        }
-                    }
-                }
-            }
-
-
-        } else {
-            throw new Error('Env "', env, '" is not in config file');
-        }
+        commandBuilder
+            .setComposeFiles(envConfig.docker.compose_files)
+            .setUser(args.user || envConfig.docker.user)
+            .setVars(envConfig.vars);
 
         commandBuilder
             .setContainer(args.container)
