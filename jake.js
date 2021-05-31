@@ -59,8 +59,6 @@ try {
         }
     }
 
-    console.log(JSON.stringify(systemEnv, null, 2))
-
     if (args.task !== null) {
         var TaskManager = require('./task-manager').TaskManager;
 
