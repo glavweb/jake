@@ -87,7 +87,9 @@ CommandBuilder.prototype._build = function () {
 
     result = 'docker-compose';
 
-    result += ' -p ' + this.projectName;
+    if (this.projectName) {
+        result += ' -p ' + this.projectName;
+    }
 
     var i;
 

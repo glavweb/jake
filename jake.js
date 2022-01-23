@@ -33,8 +33,11 @@ try {
     var envConfig = config.environtments[env];
     var envReplace = require('./env-replace');
 
-    if ('project_name' in config) {
-        systemEnv.JAKE_PROJECT_NAME = config.project_name;
+    var projectName = systemEnv.JAKE_PROJECT_NAME || (config.project_name ? envReplace(config.project_name) : null);
+    var aliases = config.aliases || {};
+
+    if (projectName !== systemEnv.JAKE_PROJECT_NAME) {
+        systemEnv.JAKE_PROJECT_NAME = projectName;
     }
 
     for (var i = 0; i < envConfig.vars.length; i++) {
@@ -87,9 +90,15 @@ try {
         commandBuilder
             .setContainer(args.container)
             .setCmd(args.docker_compose, args.cmd)
-            .setAliases(config.aliases)
-            .setProjectName(config.project_name)
             .setEnv(env);
+
+        if (aliases) {
+          commandBuilder.setAliases(aliases);
+        }
+
+        if (projectName) {
+          commandBuilder.setProjectName(projectName);
+        }
 
         var interactive = envConfig.docker.interactive || args.interactive;
         var tty = envConfig.docker.tty || args.tty || process.stdout.isTTY;
