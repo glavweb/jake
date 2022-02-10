@@ -33,8 +33,14 @@ try {
     var envConfig = config.environtments[env];
     var envReplace = require('./env-replace');
 
-    var projectName = systemEnv.JAKE_PROJECT_NAME || (config.project_name ? envReplace(config.project_name) : null);
+    var projectName = systemEnv.JAKE_PROJECT_NAME || null;
     var aliases = config.aliases || {};
+
+    if (envConfig.project_name) {
+        projectName = envReplace(envConfig.project_name);
+    } else if (config.project_name) {
+        projectName = envReplace(config.project_name);
+    }
 
     if (projectName !== systemEnv.JAKE_PROJECT_NAME) {
         systemEnv.JAKE_PROJECT_NAME = projectName;
