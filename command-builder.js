@@ -132,7 +132,7 @@ CommandBuilder.prototype.build = function () {
                 result += this.container;
             }
 
-            result += ' bash -c';
+            result += ' sh -c';
             
             if (this.interactive) {
                 result += 'i';
@@ -166,4 +166,3 @@ CommandBuilder.prototype.buildPs = function () {
 CommandBuilder.prototype.buildIsRunning = function () {
     return 'docker inspect -f "{{.State.Running}}" ' + this.containerId;
 };
-
