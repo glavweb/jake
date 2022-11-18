@@ -121,7 +121,7 @@ CommandBuilder.prototype.build = function () {
             } else {
                 result += ' run --rm';
             }
-            if (this.user !== null) {
+            if (this.user) {
                 result += ' -u ' + this.user;
             }
             result += ' ';
