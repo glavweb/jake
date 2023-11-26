@@ -1,12 +1,8 @@
 #!/usr/bin/env node
 'use strict';
 
-const config = require('./config');
 const args = require('./args');
-
-if (args.help) {
-  process.exit(0);
-}
+const config = require('./config');
 
 const version = config.version ?? 1;
 const jake = require(`./v${version}/jake`);
