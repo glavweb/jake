@@ -17,9 +17,14 @@
   "author": "Sergey Zvyagintsev <nitron.ru@gmail.com>",
   "license": "ISC",
   "dependencies": {
-    "argparse": "^1.0.6",
-    "js-yaml": "^3.5.3",
-    "log-util": "^1.1.1",
-    "mkdirp": "^1.0.4"
+    "argparse": "^2.0.1",
+    "deepmerge": "^4.3.1",
+    "js-yaml": "^4.1.0",
+    "mkdirp": "^3.0.1",
+    "ps-tree": "^1.2.0",
+    "signale": "^1.4.0"
+  },
+  "engines": {
+    "node": ">=6.4.0"
   }
 }

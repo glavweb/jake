@@ -83,33 +83,33 @@ CommandBuilder.prototype.getAlias = function (inCmd) {
 };
 
 CommandBuilder.prototype._build = function () {
-    var result;
+  let result;
 
-    result = 'docker-compose';
+  result = 'docker-compose';
 
     if (this.projectName) {
         result += ' -p ' + this.projectName;
     }
 
-    var i;
+  let i;
 
-    for (i = 0; i < this.composeFiles.length; i++) {
-        var composeFileName = this.composeFiles[i];
-        result += ' -f ' + composeFileName + '';
+  for (i = 0; i < this.composeFiles.length; i++) {
+      const composeFileName = this.composeFiles[i];
+      result += ' -f ' + composeFileName + '';
     }
 
     return result;
 };
 
 CommandBuilder.prototype.build = function () {
-    var result;
+  let result;
 
-    if (this.isDockerCommand || this.container !== null) {
+  if (this.isDockerCommand || this.container) {
         result = this._build();
 
         if (this.isDockerCommand) {
             result += ' ' + this.cmd.join(' ');
-        } else if (this.container !== null) {
+        } else if (this.container) {
             if (this.isRunning) {
                 result = 'docker exec';
                 if (this.tty) {
@@ -141,10 +141,10 @@ CommandBuilder.prototype.build = function () {
             result += ' "' + this.cmd.join(' ') + '"';
         }
     } else {
-        var alias = this.cmd[0];
-        var aliasCmd = this.getAlias(alias);
+      const alias = this.cmd[0];
+      const aliasCmd = this.getAlias(alias);
 
-        if (aliasCmd === null) {
+      if (aliasCmd === null) {
             throw new Error('Invalid alias "' + alias + '"');
         }
         result = aliasCmd + ' ' + this.cmd.slice(1).join(' ');
@@ -154,9 +154,9 @@ CommandBuilder.prototype.build = function () {
 };
 
 CommandBuilder.prototype.buildPs = function () {
-    var result;
+  let result;
 
-    result = this._build();
+  result = this._build();
 
     result += ' ps -q ' + this.container;
 

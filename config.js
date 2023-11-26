@@ -1,6 +1,6 @@
 'use strict';
 
-var yaml = require('js-yaml');
-var fs   = require('fs');
+const yaml = require('js-yaml');
+const fs = require('fs');
 
-module.exports = yaml.safeLoad(fs.readFileSync('.jake.yml', 'utf8'));
+module.exports = yaml.load(fs.readFileSync('.jake.yml', 'utf8'));

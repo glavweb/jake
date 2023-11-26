@@ -1,13 +1,13 @@
 'use strict';
 
-var escapeRegexp = function (inString) {
+const escapeRegexp = function (inString) {
     return inString.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
 };
 
 module.exports = function (inString) {
-    var pattern = '([^\\$])?\\$\\{?(';
-    var isFirst = true;
-    for (var varName in process.env) {
+    let pattern = '([^\\$])?\\$\\{?(';
+    let isFirst = true;
+    for (const varName in process.env) {
         if (process.env.hasOwnProperty(varName)) {
             if (isFirst) {
                 isFirst = false;
@@ -18,7 +18,7 @@ module.exports = function (inString) {
         }
     }
     pattern += ')\\}?';
-    var re = new RegExp(pattern, 'g');
+    const re = new RegExp(pattern, 'g');
 
     return inString.replace(re, function (match, p1, p2) {
         return (p1 === undefined ? '' : p1)  + process.env[p2];
