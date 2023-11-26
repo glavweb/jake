@@ -52,33 +52,37 @@ module.exports.run = async function (args, env, debug, logger, isTerminating) {
             }
         }
 
+        const vars = {};
         for (const varObject of envConfig.vars ?? []) {
             for (const varName in varObject) {
-                if (varObject.hasOwnProperty(varName)) {
-                    let value = varObject[varName];
-                    let newValue = value;
-                    if (value === null) {
-                        if (!(varName in systemEnv)) {
-                            throw new Error(`Environment variable "${varName}" expected, but not defined`);
-                        }
-                        newValue = systemEnv[varName];
-                    } else {
-                        if (typeof value !== 'string') {
-                            throw new Error(`Variable "${varName}" value must be a string`)
-                        }
-                        const executableVariableMatch = value.trim().match(executableVariableRegExp)
-                        if (executableVariableMatch) {
-                            newValue = (await executor.exec(executableVariableMatch[1], true)).slice(0, -1);
-                        } else {
-                            newValue = envReplace(value);
-                        }
-
-                        systemEnv[varName] = newValue;
-                    }
-                    logger.debug(`ENV ${varName}=${newValue} [${value}]`);
-                }
+                vars[varName] = varObject[varName];
             }
         }
+
+        for (const varName in vars) {
+            let value = vars[varName];
+            let newValue = value;
+            if (value === null) {
+                if (!(varName in systemEnv)) {
+                    throw new Error(`Environment variable "${varName}" expected, but not defined`);
+                }
+                newValue = systemEnv[varName];
+            } else {
+                if (typeof value !== 'string') {
+                    throw new Error(`Variable "${varName}" value must be a string`)
+                }
+                const executableVariableMatch = value.trim().match(executableVariableRegExp)
+                if (executableVariableMatch) {
+                    newValue = (await executor.exec(executableVariableMatch[1], true)).slice(0, -1);
+                } else {
+                    newValue = envReplace(value);
+                }
+
+                systemEnv[varName] = newValue;
+            }
+            logger.debug(`ENV ${varName}=${newValue} [${value}]`);
+        }
+
 
         if (args.task) {
             const TaskManager = require('./task-manager');
