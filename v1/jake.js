@@ -103,7 +103,7 @@ module.exports.run = async function (args, env, debug, logger) {
         if (containerId) {
           commandBuilder.setContainerId(containerId);
 
-          const isRunning = await executor.exec(commandBuilder.buildIsRunning(), true).indexOf('true') >= 0;
+          const isRunning = (await executor.exec(commandBuilder.buildIsRunning(), true)).indexOf('true') >= 0;
 
           logger.debug('CONTAINER_IS_RUNNING', isRunning);
           commandBuilder.setIsRunning(isRunning);
