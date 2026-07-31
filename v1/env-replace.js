@@ -7,20 +7,23 @@ const escapeRegexp = function (inString) {
 module.exports = function (inString) {
   let pattern = '([^\\$])?\\$\\{?(';
   let isFirst = true;
-  for (let varName in process.env) {
-        if (process.env.hasOwnProperty(varName)) {
-            if (isFirst) {
-                isFirst = false;
-                pattern += escapeRegexp(varName);
-            } else {
-                pattern += '|' + escapeRegexp(varName);
-            }
-        }
+  const varNames = Object.keys(process.env)
+    .filter((varName) => process.env.hasOwnProperty(varName))
+    .sort((a, b) => b.length - a.length);
+
+  for (const varName of varNames) {
+    if (isFirst) {
+      isFirst = false;
+      pattern += escapeRegexp(varName);
+    } else {
+      pattern += '|' + escapeRegexp(varName);
     }
-    pattern += ')\\}?';
+  }
+  pattern += ')\\}?';
+
   const re = new RegExp(pattern, 'g');
 
   return inString.replace(re, function (match, p1, p2) {
-        return (p1 === undefined ? '' : p1)  + process.env[p2];
-    });
+    return (p1 === undefined ? '' : p1) + process.env[p2];
+  });
 };
