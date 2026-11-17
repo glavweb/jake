@@ -9,6 +9,11 @@ if (!config || typeof config !== 'object') {
   process.exit(1);
 }
 
+if (args.list) {
+  require('./list')(config);
+  process.exit(0);
+}
+
 const version = config.version ?? 1;
 const jake = require(`./v${version}/jake`);
 const SignalsHandler = require('./signals-handler');

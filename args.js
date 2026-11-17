@@ -95,6 +95,14 @@ parser.add_argument(
 );
 
 parser.add_argument(
+  '-l', '--list',
+  {
+    help: 'List environments, tasks and aliases',
+    action: 'store_true'
+  }
+);
+
+parser.add_argument(
   '--version',
   {
     help: 'show jake version',
