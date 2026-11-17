@@ -4,6 +4,11 @@
 const args = require('./args');
 const config = require('./config');
 
+if (!config || typeof config !== 'object') {
+  console.error('Config file ".jake.yml" is not found or empty.');
+  process.exit(1);
+}
+
 const version = config.version ?? 1;
 const jake = require(`./v${version}/jake`);
 const SignalsHandler = require('./signals-handler');

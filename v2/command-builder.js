@@ -1,5 +1,7 @@
 'use strict';
 
+const UsageError = require('../usage-error');
+
 module.exports = class CommandBuilder {
   constructor() {
     this.projectName = null;
@@ -151,7 +153,10 @@ module.exports = class CommandBuilder {
       const aliasCmd = this.getAlias(alias);
 
       if (aliasCmd === null) {
-        throw new Error(`Invalid alias "${alias}"`);
+        const known = Object.keys(this.aliases || {});
+        throw new UsageError(
+          `Invalid alias "${alias}". Available aliases: ${known.join(', ') || 'none'}`
+        );
       }
       result = aliasCmd + ' ' + this._escapeCommand(this.cmd.slice(1).join(' '));
     }

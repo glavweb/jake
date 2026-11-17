@@ -1,5 +1,7 @@
 'use strict';
 
+const UsageError = require('../usage-error');
+
 module.exports.TaskManager = TaskManager;
 module.exports.Task = Task;
 
@@ -19,6 +21,12 @@ TaskManager.prototype.init = function () {
 };
 
 TaskManager.prototype.runTask = async function (inTaskName) {
+    if (!(inTaskName in this.tasks)) {
+        throw new UsageError(
+            `Task "${inTaskName}" is not in config file. Available: ${Object.keys(this.tasks).join(', ') || 'none'}`
+        );
+    }
+
     await this.tasks[inTaskName].run();
 };
 

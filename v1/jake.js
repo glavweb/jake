@@ -11,13 +11,16 @@ module.exports.run = async function (args, env, debug, logger) {
 
   const Executor = require('./executor');
   const executor = new Executor(logger);
+  const UsageError = require('../usage-error');
 
   logger.debug('JAKE_ENV', env);
   logger.debug('JAKE_DEBUG', debug);
 
   try {
     if (!(env in config.environtments)) {
-      throw new Error(`Env "${env}" is not in config file`);
+      throw new UsageError(
+        `Env "${env}" is not in config file. Available: ${Object.keys(config.environtments).join(', ') || 'none'}`
+      );
     }
 
     const envConfig = config.environtments[env];
@@ -118,6 +121,6 @@ module.exports.run = async function (args, env, debug, logger) {
       await executor.exec(commandBuilder.build());
     }
   } catch (e) {
-    logger.error(e.stack);
+    logger.error(e instanceof UsageError ? e.message : e.stack);
   }
 }

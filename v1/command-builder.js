@@ -1,5 +1,7 @@
 'use strict';
 
+const UsageError = require('../usage-error');
+
 module.exports.CommandBuilder = CommandBuilder;
 
 function CommandBuilder() {
@@ -145,7 +147,10 @@ CommandBuilder.prototype.build = function () {
       const aliasCmd = this.getAlias(alias);
 
       if (aliasCmd === null) {
-            throw new Error('Invalid alias "' + alias + '"');
+            const known = Object.keys(this.aliases || {});
+            throw new UsageError(
+                'Invalid alias "' + alias + '". Available aliases: ' + (known.join(', ') || 'none')
+            );
         }
         result = aliasCmd + ' ' + this.cmd.slice(1).join(' ');
     }

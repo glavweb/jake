@@ -7,6 +7,7 @@ const Executor = require('./executor');
 const config = require('../config');
 const envReplace = require("./env-replace");
 const ExecutorError = require("./executor-error");
+const UsageError = require("../usage-error");
 
 const executableVariableRegExp = /^\$\((.+)\)$/;
 
@@ -25,7 +26,9 @@ module.exports.run = async function (args, env, debug, logger, isTerminating, co
     try {
 
         if (!(env in config.environments)) {
-            throw new Error(`Env "${env}" is not in config file`);
+            throw new UsageError(
+                `Env "${env}" is not in config file. Available: ${Object.keys(config.environments).join(', ') || 'none'}`
+            );
         }
 
         let envConfig = config.environments[env];
@@ -149,7 +152,9 @@ module.exports.run = async function (args, env, debug, logger, isTerminating, co
             await executor.exec(commandBuilder.build());
         }
     } catch (e) {
-        if (!(e instanceof ExecutorError)) {
+        if (e instanceof UsageError) {
+            logger.error(e.message);
+        } else if (!(e instanceof ExecutorError)) {
             logger.error(e.stack);
         }
         if (!isTerminating()) {
