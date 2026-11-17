@@ -10,9 +10,9 @@ const ExecutorError = require("./executor-error");
 
 const executableVariableRegExp = /^\$\((.+)\)$/;
 
-module.exports.run = async function (args, env, debug, logger, isTerminating) {
+module.exports.run = async function (args, env, debug, logger, isTerminating, containerContext) {
     const systemEnv = process.env;
-    const executor = new Executor(logger);
+    const executor = new Executor(logger, containerContext);
 
     systemEnv.JAKE_ENV = env;
     systemEnv.JAKE_DEBUG = String(debug);
@@ -140,6 +140,12 @@ module.exports.run = async function (args, env, debug, logger, isTerminating) {
                 logger.debug('INTERACTIVE', interactive);
                 commandBuilder.setInteractive(interactive);
             }
+
+            if (args.container && commandBuilder.isRunning) {
+                commandBuilder.setRef(`/tmp/.jake-${process.pid}-${Math.random().toString(36).slice(2, 10)}.ref`);
+                executor.setContainerContext(commandBuilder);
+            }
+
             await executor.exec(commandBuilder.build());
         }
     } catch (e) {

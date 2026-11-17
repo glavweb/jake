@@ -15,10 +15,11 @@ const logLevel = debug ? 'info' : 'error';
 const terminateTimeout = process.env.JAKE_TERMINATE_TIMEOUT ?? args.terminate_timeout
 
 const logger = new Signale({logLevel, scope: args.cmd.join(' ')});
-const signalsHandler = new SignalsHandler(terminateTimeout, logger);
+const containerContext = require('./v2/container-context');
+const signalsHandler = new SignalsHandler(terminateTimeout, logger, containerContext);
 
 logger.config({
   displayTimestamp: true
 });
 
-jake.run(args, env, debug, logger, () => signalsHandler.terminating);
+jake.run(args, env, debug, logger, () => signalsHandler.terminating, containerContext);

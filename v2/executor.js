@@ -4,8 +4,16 @@ const cp = require('child_process');
 const ExecutorError = require("./executor-error");
 
 module.exports = class Executor {
-    constructor(inLogger) {
+    constructor(inLogger, inContainerContext) {
         this.logger = inLogger;
+        this.containerContext = inContainerContext || null;
+    }
+
+    setContainerContext(commandBuilder) {
+        if (!this.containerContext || !commandBuilder.ref) {
+            return;
+        }
+        this.containerContext.builder = commandBuilder;
     }
 
     async exec(inCmd, inNeedOutput) {

@@ -14,6 +14,12 @@ module.exports = class CommandBuilder {
     this.aliases = [];
     this.isRunning = false;
     this.wrapWithShell = false;
+    this.ref = null;
+  }
+
+  setRef(inRef) {
+    this.ref = inRef;
+    return this;
   }
 
   setProjectName(inProjectName) {
@@ -124,7 +130,11 @@ module.exports = class CommandBuilder {
 
         result += ' ' + this.container;
 
-        if (this.wrapWithShell) {
+        if (this.ref) {
+          const record = `echo "$$ $(cut -d' ' -f22 /proc/$$/stat)" > ${this.ref}`;
+          result += ' sh -c' + (this.interactive ? 'i' : '') + ' ' + this._quote(record + '; exec "$@"');
+          result += ' -- ' + this._containerArgv();
+        } else if (this.wrapWithShell) {
           result += ' sh -c';
 
           if (this.interactive) {
@@ -151,6 +161,61 @@ module.exports = class CommandBuilder {
 
   buildIsRunning() {
     return `${this._build()} ps --format="{{ .State }}" ${this.container}`;
+  }
+
+  _containerExecScript(script) {
+    let result = this._build() + ' exec -T';
+
+    if (this.user) {
+      result += ' -u ' + this.user;
+    }
+
+    return result + ' ' + this.container + ' sh -c ' + this._quote(script);
+  }
+
+  _signalScript(signal) {
+    const ref = this.ref;
+    return `i=0; while [ ! -s ${ref} ] && [ $i -lt 10 ]; do sleep 0.05; i=$((i+1)); done; `
+      + `read P S < ${ref} 2>/dev/null; `
+      + `[ -n "$P" ] && [ "$(cut -d' ' -f22 /proc/$P/stat 2>/dev/null)" = "$S" ] `
+      + `&& kill -${signal} -$P`;
+  }
+
+  buildContainerSignalCommand(signal) {
+    return this._containerExecScript(this._signalScript(signal));
+  }
+
+  buildContainerKillCommand() {
+    return this._containerExecScript(this._signalScript('KILL'));
+  }
+
+  buildContainerCheckCommand() {
+    const ref = this.ref;
+    return this._containerExecScript(
+      `read P S < ${ref} 2>/dev/null; `
+      + `[ -n "$P" ] && [ "$(cut -d' ' -f22 /proc/$P/stat 2>/dev/null)" = "$S" ] `
+      + `&& kill -0 -$P`
+    );
+  }
+
+  buildContainerCleanupCommand() {
+    return this._containerExecScript(`rm -f ${this.ref}`);
+  }
+
+  _quote(value) {
+    return `'${String(value).replace(/'/g, `'\\''`)}'`;
+  }
+
+  _argv() {
+    return this.cmd.map(token => this._quote(this._escapeCommand(token))).join(' ');
+  }
+
+  _containerArgv() {
+    const argv = this.wrapWithShell
+      ? ['sh', '-c' + (this.interactive ? 'i' : ''), this._escapeCommand(this.cmd.join(' '))]
+      : this.cmd;
+
+    return argv.map(token => this._quote(this._escapeCommand(token))).join(' ');
   }
 
   _escapeCommand(command) {
